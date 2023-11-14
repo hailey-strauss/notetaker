@@ -5,39 +5,43 @@ const uuid = require("uuid");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
 app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// get index
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "./public/index.html"));
 });
 
-// get notes
 app.get("/notes", (req, res) => {
   res.sendFile(path.join(__dirname, "./public/notes.html"));
 });
 
 app.get("/api/notes", async (req, res) => {
-  let notes = await readFromFile("db/db.json");
-  let parsedNotes = JSON.parse(notes);
-  res.json(parsedNotes);
+  try {
+    const notes = await readFromFile("db/db.json");
+    const parsedNotes = JSON.parse(notes);
+    res.json(parsedNotes);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to read notes." });
+  }
 });
 
 app.post("/api/notes", async (req, res) => {
-  let notes = await readFromFile("db/db.json");
-  let parsedNotes = JSON.parse(notes);
-  let { title, text } = req.body;
-  let newNote = { id: uuid.v4(), title, text };
-  let updatedNotes = [...parsedNotes, newNote];
-  await writeToFile("db/db.json", JSON.stringify(updatedNotes));
-  let overwrittenNotes = await readFromFile("db/db.json");
-  res.json(overwrittenNotes);
+  try {
+    const notes = await readFromFile("db/db.json");
+    const parsedNotes = JSON.parse(notes);
+    const { title, text } = req.body;
+    const newNote = { id: uuid.v4(), title, text };
+    const updatedNotes = [...parsedNotes, newNote];
+    await writeToFile("db/db.json", JSON.stringify(updatedNotes));
+    res.json(newNote);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to add a new note." });
+  }
 });
 
 app.listen(PORT, () =>
-  console.log("Serving static asset routes at port http://localhost:${PORT}")
+  console.log(`Server is running on http://localhost:${PORT}`)
 );
-
-module.exports = express;
