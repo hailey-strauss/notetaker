@@ -42,6 +42,19 @@ app.post("/api/notes", async (req, res) => {
   }
 });
 
+app.delete("/api/notes/:id", async (req, res) => {
+  try {
+    const notes = await readFromFile("db/db.json");
+    const parsedNotes = JSON.parse(notes);
+    const deleteId = req.params.id;
+    const filteredNotes = parsedNotes.filter((note) => note.id !== deleteId);
+    await writeToFile("db/db.json", JSON.stringify(filteredNotes));
+    res.json({ message: "Note deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete the note." });
+  }
+});
+
 app.listen(PORT, () =>
   console.log(`Server is running on http://localhost:${PORT}`)
 );
