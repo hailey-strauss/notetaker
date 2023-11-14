@@ -24,22 +24,16 @@ app.post("/", (req, res) => {
 });
 
 // Delete notes
-app.delete("/notes/:id", (req, res) => {
-  const deleteId = req.params.id;
-
-  fs.readFile("./db/db.json", "utf-8", (err, data) => {
-    if (err) throw err;
-
-    let notes = JSON.parse(data);
-    notes = notes.filter((note) => note.id !== deleteId);
-
-    fs.writeFile("./db/db.json", JSON.stringify(notes), (err) => {
+app.delete("/:id", (req, res) => {
+  const deleteId = req.params.id; // Assuming the ID in the request is a string
+  fs.readFile("./db/db.json", "UTF-8").then(function (data) {
+    const notesEl = JSON.parse(data);
+    const notesNewEl = notesEl.filter((note) => note.id !== deleteId);
+    fs.writeFile("./db/db.json", JSON.stringify(notesNewEl), (err) => {
       if (err) throw err;
-      res.json({ message: "Note deleted successfully" });
+      res.json("Your note has been deleted.");
     });
   });
 });
-
-module.exports = app;
 
 module.exports = express;
